@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour
 {
-    public Camera camera;
+    public new Camera camera;
 
     public NavMeshAgent agent; 
 
