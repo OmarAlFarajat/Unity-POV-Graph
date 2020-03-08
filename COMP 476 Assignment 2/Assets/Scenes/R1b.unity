@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.43667546, g: 0.48427135, b: 0.5645225, a: 1}
+  m_IndirectSpecularColor: {r: 0.4366757, g: 0.48427194, b: 0.5645252, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -6769,10 +6769,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
   goalPosition: {x: 0, y: 0, z: 0}
+  HEURISTIC: 0
   GRAPH_MODE: 0
   NODE_COLOR: {r: 1, g: 0, b: 0, a: 1}
   SHOW_WEIGHTS: 0
-  NODE_SIZE: 0.063
+  NODE_SIZE: 0.25
   GRAPH_RESOLUTION: 1.85
   VERTICAL_OFFSET: 0.001
 --- !u!4 &2107719030

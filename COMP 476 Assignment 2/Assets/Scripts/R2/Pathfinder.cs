@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using static POVGraph;
+
 //TODO:
 public class Pathfinder 
 {
+    //public enum Heuristic { Null, Euclidean, Cluster };
+
     Graph<Vector3, float> graph;
+    public Heuristic heuristic; 
     public List<Node<Vector3>> Open_List;
     public List<Node<Vector3>> Closed_List;
     public List<Edge<float, Vector3>> Closed_Edges;
@@ -25,7 +30,17 @@ public class Pathfinder
 
         this.startNode.CostTo = 0f;
         this.startNode.EstimatedCost = (this.goalNode.Position - this.startNode.Position).magnitude;
-        this.startNode.TotalCost = this.startNode.CostTo + this.startNode.EstimatedCost; 
+
+        switch (heuristic)
+        {
+            case Heuristic.Null:
+                this.startNode.TotalCost = this.startNode.CostTo;
+                break;
+            case Heuristic.Euclidean:
+                this.startNode.TotalCost = this.startNode.CostTo + this.startNode.EstimatedCost;
+                break;
+        }
+
         Open_List.Add(this.startNode);
     }
 
@@ -63,7 +78,15 @@ public class Pathfinder
                     Open_List.Add(n);
                     n.CostTo = cost;
                     n.EstimatedCost = (this.goalNode.Position - n.Position).magnitude;
-                    n.TotalCost = n.CostTo + n.EstimatedCost; 
+                    switch (heuristic)
+                    {
+                        case Heuristic.Null:
+                            n.TotalCost = n.CostTo /*+ n.EstimatedCost*/;
+                            break;
+                        case Heuristic.Euclidean:
+                            n.TotalCost = n.CostTo + n.EstimatedCost;
+                            break;
+                    }
                 }
             }
         }

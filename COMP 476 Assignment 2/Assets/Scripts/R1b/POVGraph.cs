@@ -8,6 +8,7 @@ using UnityEditor;
 
 public class POVGraph : MonoBehaviour
 {
+
     public Graph<Vector3, float> graph;
     public Pathfinder pathfinder;
     public Vector3 startPosition;
@@ -22,6 +23,9 @@ public class POVGraph : MonoBehaviour
     private const float SQUARE_BOUNDS = 4.92f;
 
     public enum Graph_Mode { Dynamic, Static  };
+    public enum Heuristic{ Null, Euclidean, Cluster};
+
+    public Heuristic HEURISTIC;
 
     [Tooltip("DYNAMIC *worse performance*: Select this option to have the graph adjust in realtime to changes in player and level geometry. " +
         "\n\nSTATIC *better performance*: Graph is only ever updated on Start() and when a goal node is placed or removed.")]
@@ -102,7 +106,12 @@ public class POVGraph : MonoBehaviour
         {
             Gizmos.color = node.NodeColor;
             if (goalNodePlaced && node.Position == goalNode.Position || goalNodePlaced && node.Position == startNode.Position)
-                Gizmos.DrawSphere(node.Position, NODE_SIZE*1.5f);
+            {
+                Gizmos.DrawSphere(node.Position, NODE_SIZE * 1.5f);
+                Gizmos.color = Color.cyan; ;
+                Gizmos.DrawSphere(node.Position, NODE_SIZE * 0.75f);
+
+            }
             else
                 Gizmos.DrawSphere(node.Position, NODE_SIZE);
 
@@ -117,7 +126,7 @@ public class POVGraph : MonoBehaviour
                 //if (n != goalNode && n != startNode)
                 {
                     Gizmos.color = Color.magenta;
-                    Gizmos.DrawSphere(n.Position, NODE_SIZE * 1.15f);
+                    Gizmos.DrawSphere(n.Position, NODE_SIZE);
                 }
             }
 
@@ -132,7 +141,7 @@ public class POVGraph : MonoBehaviour
                 if (n.Position != goalNode.Position && n.Position != startNode.Position)
                 {
                     Gizmos.color = Color.green;
-                    Gizmos.DrawSphere(n.Position, NODE_SIZE * 1.15f);
+                    Gizmos.DrawSphere(n.Position, NODE_SIZE);
                 }
             }
 
@@ -297,6 +306,7 @@ public class POVGraph : MonoBehaviour
                     if (goalNodePlaced)
                     {
                         pathfinder = new Pathfinder(startNode, goalNode, graph);
+                        pathfinder.heuristic = HEURISTIC;
                         pathfinder.FindShortestPath();
                     }
 
