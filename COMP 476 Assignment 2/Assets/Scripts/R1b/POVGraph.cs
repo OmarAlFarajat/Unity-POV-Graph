@@ -8,10 +8,10 @@ using UnityEditor;
 
 public class POVGraph : MonoBehaviour
 {
-    private Graph<Vector3, float> graph;
+    public static Graph<Vector3, float> graph;
+    public static Vector3 startNode;
+    public static Vector3 goalNode;
     private bool goalNodePlaced = false;
-    private Vector3 goalNode;
-    private Vector3 startNode;
 
     private GameObject[] walls;
     private GameObject player;
