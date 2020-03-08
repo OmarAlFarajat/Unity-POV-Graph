@@ -8,9 +8,12 @@ using UnityEditor;
 
 public class POVGraph : MonoBehaviour
 {
-    public static Graph<Vector3, float> graph;
-    public static Vector3 startNode;
-    public static Vector3 goalNode;
+    public Graph<Vector3, float> graph;
+    public Pathfinder pathfinder;
+    public Vector3 startPosition;
+    public Vector3 goalPosition;
+    public Node<Vector3> startNode;
+    public Node<Vector3> goalNode;  
     private bool goalNodePlaced = false;
 
     private GameObject[] walls;
@@ -48,9 +51,9 @@ public class POVGraph : MonoBehaviour
         addNodesFromGeometry();
         castAddEdges();
 
-        Debug.Log("> ON START...");
-        Debug.Log(">> NUMBER OF NODES: " + graph.Nodes.Count());
-        Debug.Log(">> NUMBER OF EDGES: " + graph.Edges.Count());
+        //Debug.Log("> ON START...");
+        //Debug.Log(">> NUMBER OF NODES: " + graph.Nodes.Count());
+        //Debug.Log(">> NUMBER OF EDGES: " + graph.Edges.Count());
     }
     void Update()
     {
@@ -62,8 +65,10 @@ public class POVGraph : MonoBehaviour
 
             if (goalNodePlaced)
             {
-                graph.Nodes.Add(new Node<Vector3>() { Position = goalNode, NodeColor = Color.green });
-                graph.Nodes.Add(new Node<Vector3>() { Position = startNode, NodeColor = Color.yellow });
+                graph.Nodes.Add(new Node<Vector3>() { Position = goalPosition, NodeColor = Color.green });
+                goalNode = graph.Nodes[graph.Nodes.Count - 1];
+                graph.Nodes.Add(new Node<Vector3>() { Position = startPosition, NodeColor = Color.yellow });
+                startNode = graph.Nodes[graph.Nodes.Count - 1];
             }
 
             castAddEdges();
@@ -96,10 +101,45 @@ public class POVGraph : MonoBehaviour
         foreach (var node in graph.Nodes)
         {
             Gizmos.color = node.NodeColor;
-            Gizmos.DrawSphere(node.Position, NODE_SIZE);
+            if (goalNodePlaced && node.Position == goalNode.Position || goalNodePlaced && node.Position == startNode.Position)
+                Gizmos.DrawSphere(node.Position, NODE_SIZE*1.5f);
+            else
+                Gizmos.DrawSphere(node.Position, NODE_SIZE);
+
+        }
+        
+        // Color examined nodes in magenta
+        if (goalNodePlaced)
+        {
+            foreach (var n in pathfinder.Examined_List)
+            {
+                if (n.Position != goalNode.Position && n.Position != startNode.Position)
+                //if (n != goalNode && n != startNode)
+                {
+                    Gizmos.color = Color.magenta;
+                    Gizmos.DrawSphere(n.Position, NODE_SIZE * 1.15f);
+                }
+            }
+
+            //Gizmos.color = Color.green;
+            //int index = pathfinder.Closed_List.Count - 1; 
+            //Gizmos.DrawSphere(pathfinder.Closed_List[index].Position, NODE_SIZE * 2f);
+
+
+
+            foreach (var n in pathfinder.Closed_List)
+            {
+                if (n.Position != goalNode.Position && n.Position != startNode.Position)
+                {
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawSphere(n.Position, NODE_SIZE * 1.15f);
+                }
+            }
+
+
         }
 
-        // Leave this here as a reference to R2/R3. Will be used to "highlight" shortest and explored paths in A* search.  
+        //// Leave this here as a reference to R2/R3. Will be used to "highlight" shortest and explored paths in A* search.  
         //var thickness = 10;
 
         //Vector3 verticalOffset = new Vector3(0f, 0f, 0f);
@@ -236,15 +276,17 @@ public class POVGraph : MonoBehaviour
             {
                 if (hit.collider.CompareTag("Floor"))
                 {
-                    goalNode = hit.point;
-                    startNode = new Vector3(player.transform.position.x, VERTICAL_OFFSET, player.transform.position.z);
+                    goalPosition = hit.point;
+                    startPosition = new Vector3(player.transform.position.x, VERTICAL_OFFSET, player.transform.position.z);
 
                     initGraph();
                     addNodesFromGeometry();
 
                     if (!goalNodePlaced){
-                        graph.Nodes.Add(new Node<Vector3>() { Position = goalNode, NodeColor = Color.green });
-                        graph.Nodes.Add(new Node<Vector3>() { Position = startNode, NodeColor = Color.yellow });
+                        graph.Nodes.Add(new Node<Vector3>() { Position = goalPosition, NodeColor = Color.green });
+                        goalNode = graph.Nodes[graph.Nodes.Count - 1];
+                        graph.Nodes.Add(new Node<Vector3>() { Position = startPosition, NodeColor = Color.yellow });
+                        startNode = graph.Nodes[graph.Nodes.Count - 1];
                         goalNodePlaced = true;
                     }
                     else
@@ -252,9 +294,15 @@ public class POVGraph : MonoBehaviour
 
                     castAddEdges();
 
-                    Debug.Log("> ON INJECT...");
-                    Debug.Log(">> NUMBER OF NODES: " + graph.Nodes.Count());
-                    Debug.Log(">> NUMBER OF EDGES: " + graph.Edges.Count());
+                    if (goalNodePlaced)
+                    {
+                        pathfinder = new Pathfinder(startNode, goalNode, graph);
+                        pathfinder.FindShortestPath();
+                    }
+
+                    //Debug.Log("> ON INJECT...");
+                    //Debug.Log(">> NUMBER OF NODES: " + graph.Nodes.Count());
+                    //Debug.Log(">> NUMBER OF EDGES: " + graph.Edges.Count());
                 }
             }
         }

@@ -17,8 +17,22 @@ public class Graph<TNodeType,TEdgeType>
 
 public class Node<TNodeType>
 {
+    public Node()
+    {
+        CostTo = 0f;
+        EstimatedCost = 0f;
+        TotalCost = 0f; 
+    }
     public Color NodeColor { get; set; }
     public TNodeType Position { get; set; }
+
+    // g()
+    public float CostTo { get; set; }
+    // h()
+    public float EstimatedCost { get; set; }
+    // f()
+    public float TotalCost { get; set; }
+
 }
 
 public class Edge<TEdgeType, TNodeType>
