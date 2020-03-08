@@ -18,13 +18,13 @@ public class Graph<TNodeType,TEdgeType>
 public class Node<TNodeType>
 {
     public Color NodeColor { get; set; }
-    public TNodeType Value { get; set; }
+    public TNodeType Position { get; set; }
 }
 
 public class Edge<TEdgeType, TNodeType>
 {
     public Color EdgeColor { get; set; }
-    public TEdgeType Value { get; set; }
+    public TEdgeType Weight { get; set; }
     public Node<TNodeType> From { get; set; }
     public Node<TNodeType> To { get; set; }
 }
