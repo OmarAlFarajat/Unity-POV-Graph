@@ -27,14 +27,18 @@ public class Node<TNodeType>
     }
     public Color NodeColor { get; set; }
     public TNodeType Position { get; set; }
+
+    // Used to trace back the path from goal node to start after A* search. 
     public Node<Vector3> Predecessor { get; set; }
+    // Used for cluster heuristic
     public string Membership { get; set; }
 
-    // g()
+    // See "A-star-pseudocode.png"
+    // g() : Cost so Far
     public float CostTo { get; set; }
-    // h()
+    // h() :  Heuristic value, i.e. Best guess.
     public float EstimatedCost { get; set; }
-    // f()
+    // f() :  Combined cost
     public float TotalCost { get; set; }
 
 }

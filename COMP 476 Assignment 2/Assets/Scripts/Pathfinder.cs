@@ -53,16 +53,23 @@ public class Pathfinder
 
     public List<Edge<float, Vector3>> FindShortestPath(Dictionary<string,float> LU_Table)
     {
-        List<Edge<float, Vector3>> path = new List<Edge<float, Vector3>>(); 
+        // Outbound container of edges to be returned when path is found
+        List<Edge<float, Vector3>> path = new List<Edge<float, Vector3>>();
 
+        /* Adapted from the pseudocode found in "A-star-pseudocode.png"
+         * SOURCE: 
+         * Sharma, H., Alekseychuk, A., Leskovsky, P. et al. 
+         * Determining similarity in histological images using graph-theoretic description and matching methods for content-based image retrieval in medical diagnostics. 
+         * Diagn Pathol 7, 134 (2012). https://doi.org/10.1186/1746-1596-7-134 */
         while (Open_List.Count != 0)
         {
+            // Get m, the node on top of the open list, with least total cost f()
             Open_List.Sort((p1, p2) => p1.TotalCost.CompareTo(p2.TotalCost));
-
             Node<Vector3> m = Open_List[0];
 
             if (m == this.goalNode)
             {
+                // Adapted the pseudocode so that when the goal node is found, it builds an edge list going backwards from the goal node
                 while (m.Predecessor != null)
                 {
                     path.Add(new Edge<float, Vector3>() { EdgeColor = Color.green, From = m, To = m.Predecessor });
@@ -83,7 +90,7 @@ public class Pathfinder
                 float cost = m.CostTo + (m.Position-n.Position).sqrMagnitude;
 
                 if (Open_List.Contains(n) && cost < n.CostTo)
-                    Open_List.Remove(n);
+                    Open_List.Remove(n);    // "Remove n from open list as new path is better"
 
                 if (Closed_List.Contains(n) && cost < n.CostTo)
                     Closed_List.Remove(n);
@@ -92,12 +99,13 @@ public class Pathfinder
                 {
                     Examined_List.Add(n);
                     Open_List.Add(n);
-                    n.Predecessor = m;      // PARENT
+                    n.Predecessor = m;      // Keep track of the predecessor node i.e. "parent" for backwards traversal of solution path
                     n.CostTo = cost;
+                    // Adapted the pseudocode here to accomodate different heuristic types
                     switch (heuristic)
                     {
                         case Heuristic.Null:
-                            n.TotalCost = n.CostTo /*+ n.EstimatedCost*/;
+                            n.TotalCost = n.CostTo;
                             break;
                         case Heuristic.Euclidean:
                             n.EstimatedCost = (this.goalNode.Position - n.Position).sqrMagnitude;
@@ -110,9 +118,7 @@ public class Pathfinder
                             }
                             else
                             {
-                                Debug.Log("Using Look-Up Table with key: " + m.Membership + n.Membership);
-
-                                n.EstimatedCost = LU_Table[(m.Membership + n.Membership).Trim()];
+                                n.EstimatedCost = LU_Table[m.Membership + n.Membership];
                                 n.TotalCost = n.CostTo + n.EstimatedCost;
                             }
                             break;
@@ -120,11 +126,15 @@ public class Pathfinder
                 }
             }
         }
+        // If this function ever returns null, something is wrong...
         return null;    // SKETCH
 
     }
 
-    public float GetShortestValue()
+    /* This is nearly identical to FindShortestPath (see "Diffs" below), but only returns the total cost of the path. 
+     * This is only ever used when making the XML file for the look-up table. 
+     * The shortest paths between clusters uses Euclidean heuristic */
+    public float FindShortestValue()
     {
         while (Open_List.Count != 0)
         {
@@ -134,6 +144,7 @@ public class Pathfinder
 
             if (m == this.goalNode)
             {
+                // Diff: Ends earlier here and just returns the total cost of the shortest path found. 
                 return m.TotalCost;
             }
 
@@ -159,18 +170,9 @@ public class Pathfinder
                     Open_List.Add(n);
                     n.Predecessor = m;      // PARENT
                     n.CostTo = cost;
+                    // Diff: Defaults to Euclidean heuristic always. 
                     n.EstimatedCost = (this.goalNode.Position - n.Position).sqrMagnitude;
                     n.TotalCost = n.CostTo + n.EstimatedCost;       // (!) Assumes that GetShortestValue() is only ever using Euclidean heuristic (for cluster look up table generation). 
-
-                    //switch (heuristic)
-                    //{
-                    //    case Heuristic.Null:
-                    //        n.TotalCost = n.CostTo /*+ n.EstimatedCost*/;
-                    //        break;
-                    //    case Heuristic.Euclidean:
-                    //        n.TotalCost = n.CostTo + n.EstimatedCost;
-                    //        break;
-                    //}
                 }
             }
         }
@@ -180,6 +182,8 @@ public class Pathfinder
 
     List<Node<Vector3>> GetChildren(Node<Vector3> source)
     {
+        // Helper function for the searches. Gets all nodes connected to the passed node (called children)
+
         List<Node<Vector3>> Children = new List<Node<Vector3>>(); 
 
         foreach(var n in this.graph.Edges)

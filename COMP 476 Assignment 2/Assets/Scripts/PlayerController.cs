@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 
+
+// This script is only ever used in R1 for Unity's navmesh. 
+
 public class PlayerController : MonoBehaviour
 {
     public new Camera camera;
 
     public NavMeshAgent agent; 
 
-    // Update is called once per frame
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))

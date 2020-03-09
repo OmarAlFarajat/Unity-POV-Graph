@@ -61,16 +61,19 @@ public class POVGraph : MonoBehaviour
         addNodesFromGeometry();
         castAddEdges();
 
-        // Uncomment only one or the other. 
 
-        // Make sure POV graph's heuristic mode is set to "Euclidean" when creating the look up table! 
+        /*WARNING: 
+         * Uncomment this section for ONLY if you've modified POVGraph (resolution, player radius, or by changing level geometry).
+         * This will create a new look-up table as an XML file which will be read by ReadLookUpXML() to initialize POVGraph's look up table.
+         * Make sure POV graph's heuristic mode is set to "Euclidean" when doing so! 
+         * Comment out the call to ReadLookUpXML() in injectNodeOnClick() if making a new table.*/
+
         //setNodesMemberships();
         //WriteLookUpXML();
 
-        ReadLookUpXML();
+        /*WARNING*/
 
-
-        }
+    }
 
     void Update()
     {
@@ -82,7 +85,6 @@ public class POVGraph : MonoBehaviour
             addStartAndGoal();
             castAddEdges();
         }
-
         injectNodeOnClick();
     }
     void OnDrawGizmos()
@@ -122,9 +124,10 @@ public class POVGraph : MonoBehaviour
                 Gizmos.DrawSphere(node.Position, NODE_SIZE);
         }
         
-        // Color examined nodes in magenta
+        // If a goal node has been placed, then show a color-coded fill. 
         if (goalNodePlaced)
         {
+            // Magenta color for examined nodes (nodes that went into the open list)
             foreach (var n in pathfinder.Examined_List)
             {
                 if (n.Position != goalNode.Position && n.Position != startNode.Position)
@@ -135,6 +138,7 @@ public class POVGraph : MonoBehaviour
                 }
             }
 
+            // Yellow color for nodes that are in the closed list after invocation of A* search
             foreach (var n in pathfinder.Closed_List)
             {
                 if (n.Position != goalNode.Position && n.Position != startNode.Position)
@@ -145,6 +149,7 @@ public class POVGraph : MonoBehaviour
                 }
             }
 
+            // Draw thick green lines to highlight the shortest path
             foreach (var edge in path)
             {
                 var thickness = 20f;
@@ -238,15 +243,6 @@ public class POVGraph : MonoBehaviour
                 
                 duplicateFound = false;
             }
-
-            /* Comment out the block of code above and uncomment the code below to see the differences between filtered and unfiltered vertex processing. 
-             * Spoiler Alert! With filtering is much better! */
-
-            //// WITHOUT FILTERING
-            //vertices.Add(new Vector3(bounds.min.x, VERTICAL_OFFSET, bounds.min.z) - playerExtents);
-            //vertices.Add(new Vector3(bounds.min.x - playerExtents.x, VERTICAL_OFFSET, bounds.max.z + playerExtents.z));
-            //vertices.Add(new Vector3(bounds.max.x, VERTICAL_OFFSET, bounds.max.z) + playerExtents);
-            //vertices.Add(new Vector3(bounds.max.x + playerExtents.x, VERTICAL_OFFSET, bounds.min.z - playerExtents.z));
         }
 
         // Iterate through the vertices container and if the vertex is within the space of the map, add it as a node to the graph.
@@ -259,6 +255,8 @@ public class POVGraph : MonoBehaviour
 
     void addStartAndGoal()
     {
+        // Helper function used in Update() to ensure that start and goal nodes are included when in Dynamic mode (else they disappear as the graph is constantly updated). 
+
         if (goalNodePlaced)
         {
             graph.Nodes.Add(new Node<Vector3>() { Position = goalPosition, NodeColor = Color.green });
@@ -269,6 +267,9 @@ public class POVGraph : MonoBehaviour
     }
     void setNodesMemberships()
     {
+        /* Is only relevant when a new look-up table is being generated. 
+         * Attributes each node with membership to a cluster (i.e. A, B, C, etc.) */
+
         foreach (var n in graph.Nodes)
             foreach (var c in clusters)
                 if (c.GetComponent<Collider>().bounds.Contains(n.Position))
@@ -283,12 +284,17 @@ public class POVGraph : MonoBehaviour
         {
             foreach (var goal in graph.Nodes)
             {
+                // Ignores node pairs that are in the same cluster
                 if (start.Membership.Equals(goal.Membership))
                     continue;
-
+                /*The look-up table is implemented as a Dictionary<string,float>. 
+                 * By concatinating start's and goal's memberships, we'll obtain keys such as AB or EF.*/
                 string key = start.Membership + goal.Membership;
-                float value = new Pathfinder(start, goal, graph, lookUpTable).GetShortestValue();
+                // Get the shortest path between the node pairs
+                float value = new Pathfinder(start, goal, graph, lookUpTable).FindShortestValue();
 
+                /* If the key already exists in the table, then compare values and keep the lower value. 
+                 * If the key doesn't exist, then just add it.*/
                 if (lookUpTable.ContainsKey(key))
                 {
                     if (value < lookUpTable[key])
@@ -315,6 +321,8 @@ public class POVGraph : MonoBehaviour
     {
         lookUpTable = XElement.Parse(File.ReadAllText("LUTable.xml")).Elements().ToDictionary(k => k.Name.ToString(), v => float.Parse(v.Value.ToString()));
 
+        // Leaving this here just in case, for debugging. 
+
         //foreach (var entry in lookUpTable)
         //{
         //    Debug.Log("AA" + " " + lookUpTable["AB"] + " " + lookUpTable["AC"] + " " + lookUpTable["AD"] + " " + lookUpTable["AE"] + " " + lookUpTable["AF"]);
@@ -334,11 +342,12 @@ public class POVGraph : MonoBehaviour
             foreach (var nodeTo in graph.Nodes)
             {
                 float distance = (nodeTo.Position - nodeFrom.Position).magnitude;
+                // Get all the hits
                 RaycastHit[] hits;
                 hits = Physics.RaycastAll(nodeFrom.Position, (nodeTo.Position - nodeFrom.Position).normalized, distance);
 
+                // Check if in all those hits, there's a wall hit. 
                 bool wallHit = false;
-
                 foreach (var hit in hits)
                     if (hit.collider.CompareTag("Wall"))
                     {
@@ -370,12 +379,17 @@ public class POVGraph : MonoBehaviour
             {
                 if (hit.collider.CompareTag("Floor"))
                 {
+                    // Snapshot containers for the start and goal node positions
                     goalPosition = hit.point;
                     startPosition = new Vector3(player.transform.position.x, VERTICAL_OFFSET, player.transform.position.z);
 
+                    // Conditional update i.e. reinitialization of graph
                     initGraph();
                     addNodesFromGeometry();
 
+                    /* If the goal-placed flag is false, then we inject them and set the flag to true.
+                     * If the flag is true, then the graph is just reinitialized without the start and goal nodes. 
+                     * This allows for the behaviour of clicking to alternatingly add or remove the start and goal nodes with every click. */
                     if (!goalNodePlaced){
                         graph.Nodes.Add(new Node<Vector3>() { Position = goalPosition, NodeColor = Color.green });
                         goalNode = graph.Nodes[graph.Nodes.Count - 1];
@@ -386,12 +400,17 @@ public class POVGraph : MonoBehaviour
                     else
                         goalNodePlaced = false;
 
+                    // Whether the start and goal nodes were placed or not, we now re-cast the edges. 
                     castAddEdges();
 
+                    // Then, if goal node is placed...
                     if (goalNodePlaced)
                     {
-                        ReadLookUpXML();
-                        setNodesMemberships();
+                        // Update the look up table
+                        ReadLookUpXML();        // WARNING: Uncomment this if making a new look up table. 
+                        setNodesMemberships();  // Only relevant if writing a new look up table XML (see Update()) 
+
+                        // Create a new pathfinder instance, update the heuristic type and get the shortest path. 
                         pathfinder = new Pathfinder(startNode, goalNode, graph, lookUpTable);
                         pathfinder.heuristic = HEURISTIC;
                         path = pathfinder.FindShortestPath(lookUpTable);
