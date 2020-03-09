@@ -3014,7 +3014,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.75
+  m_Radius: 0.96
   m_Height: 2.75
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
@@ -3072,7 +3072,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 907117356}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.03, y: 0.3, z: 0.92}
+  m_LocalPosition: {x: -4.32, y: 0.3, z: -2.83}
   m_LocalScale: {x: 0.2, y: 0.3, z: 0.2}
   m_Children: []
   m_Father: {fileID: 0}
@@ -3311,8 +3311,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
+  near clip plane: 0.1
+  far clip plane: 20
   field of view: 27.3
   orthographic: 1
   orthographic size: 5.82
@@ -3339,7 +3339,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 10, z: -0}
+  m_LocalPosition: {x: 0, y: 4.98, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -7809,12 +7809,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
   goalPosition: {x: 0, y: 0, z: 0}
-  HEURISTIC: 1
-  GRAPH_MODE: 0
+  HEURISTIC: 2
+  GRAPH_MODE: 1
   NODE_COLOR: {r: 1, g: 0, b: 0, a: 1}
   SHOW_WEIGHTS: 0
-  NODE_SIZE: 0.25
-  GRAPH_RESOLUTION: 2.13
+  NODE_SIZE: 0.1507
+  GRAPH_RESOLUTION: 1.6
   VERTICAL_OFFSET: 0.001
 --- !u!4 &2107719030
 Transform:

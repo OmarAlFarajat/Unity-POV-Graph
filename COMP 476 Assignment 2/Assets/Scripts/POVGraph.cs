@@ -4,12 +4,14 @@ using UnityEngine;
 using System.Linq;
 using UnityEditor;
 using System;
+using System.Xml.Linq;
+using System.IO;
 
 [ExecuteInEditMode]
 
 public class POVGraph : MonoBehaviour
 {
-    public Dictionary<string, float> lookUpTable; 
+    public Dictionary<string, float> lookUpTable;
 
     public Graph<Vector3, float> graph;
     public List<Edge<float, Vector3>> path; 
@@ -57,9 +59,18 @@ public class POVGraph : MonoBehaviour
     {
         initGraph();
         addNodesFromGeometry();
-        setNodesMemberships();
         castAddEdges();
-    }
+
+        // Uncomment only one or the other. 
+
+        // Make sure POV graph's heuristic mode is set to "Euclidean" when creating the look up table! 
+        //setNodesMemberships();
+        //WriteLookUpXML();
+
+        ReadLookUpXML();
+
+
+        }
 
     void Update()
     {
@@ -117,7 +128,6 @@ public class POVGraph : MonoBehaviour
             foreach (var n in pathfinder.Examined_List)
             {
                 if (n.Position != goalNode.Position && n.Position != startNode.Position)
-                //if (n != goalNode && n != startNode)
                 {
                     n.Position = new Vector3(n.Position.x, VERTICAL_OFFSET, n.Position.z);
                     Gizmos.color = Color.magenta;
@@ -257,16 +267,65 @@ public class POVGraph : MonoBehaviour
             startNode = graph.Nodes[graph.Nodes.Count - 1];
         }
     }
-    public void setNodesMemberships()
+    void setNodesMemberships()
     {
         foreach (var n in graph.Nodes)
             foreach (var c in clusters)
                 if (c.GetComponent<Collider>().bounds.Contains(n.Position))
                 {
-                    Debug.Log(c.name);
                     n.Membership = c.name;
                 }
     }
+
+    void WriteLookUpXML()
+    {
+        foreach (var start in graph.Nodes)
+        {
+            foreach (var goal in graph.Nodes)
+            {
+                if (start.Membership.Equals(goal.Membership))
+                    continue;
+
+                string key = start.Membership + goal.Membership;
+                float value = new Pathfinder(start, goal, graph, lookUpTable).GetShortestValue();
+
+                if (lookUpTable.ContainsKey(key))
+                {
+                    if (value < lookUpTable[key])
+                    {
+                        lookUpTable.Remove(key);
+                        lookUpTable.Add(key, value);
+                    }
+                }
+                else
+                    lookUpTable.Add(key, value);
+            }
+        }
+
+        string path = "LUTable.xml";
+        // Delete the file if it exists.
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        new XElement("root", lookUpTable.Select(kv => new XElement(kv.Key, kv.Value))).Save("LUTable.xml", SaveOptions.OmitDuplicateNamespaces);
+    }
+    void ReadLookUpXML()
+    {
+        lookUpTable = XElement.Parse(File.ReadAllText("LUTable.xml")).Elements().ToDictionary(k => k.Name.ToString(), v => float.Parse(v.Value.ToString()));
+
+        //foreach (var entry in lookUpTable)
+        //{
+        //    Debug.Log("AA" + " " + lookUpTable["AB"] + " " + lookUpTable["AC"] + " " + lookUpTable["AD"] + " " + lookUpTable["AE"] + " " + lookUpTable["AF"]);
+        //    Debug.Log(lookUpTable["BA"] + " " + "BB" + " " + lookUpTable["BC"] + " " + lookUpTable["BD"] + " " + lookUpTable["BE"] + " " + lookUpTable["BF"]);
+        //    Debug.Log(lookUpTable["CA"] + " " + lookUpTable["CB"] + " " + "CC" + " " + lookUpTable["CD"] + " " + lookUpTable["CE"] + " " + " " + lookUpTable["CF"]);
+        //    Debug.Log(lookUpTable["DA"] + " " + lookUpTable["DB"] + " " + lookUpTable["DC"] + " " + "DD" + " " + lookUpTable["DE"] + " " + lookUpTable["DF"]);
+        //    Debug.Log(lookUpTable["EA"] + " " + lookUpTable["EB"] + " " + lookUpTable["EC"] + " " + lookUpTable["ED"] + " " + "EE" + " " + lookUpTable["EF"]);
+        //    Debug.Log(lookUpTable["FA"] + " " + lookUpTable["FB"] + " " + lookUpTable["FC"] + " " + lookUpTable["FD"] + " " + lookUpTable["FE"] + " " + "FF");
+        //}
+
+        }
     void castAddEdges()
     {
         // Nested foreach-loops to take each node (nodeFrom) and raycast to all other nodes (nodeTo).
@@ -331,9 +390,11 @@ public class POVGraph : MonoBehaviour
 
                     if (goalNodePlaced)
                     {
-                        pathfinder = new Pathfinder(startNode, goalNode, graph);
+                        ReadLookUpXML();
+                        setNodesMemberships();
+                        pathfinder = new Pathfinder(startNode, goalNode, graph, lookUpTable);
                         pathfinder.heuristic = HEURISTIC;
-                        path = pathfinder.FindShortestPath();
+                        path = pathfinder.FindShortestPath(lookUpTable);
                     }
                 }
             }
