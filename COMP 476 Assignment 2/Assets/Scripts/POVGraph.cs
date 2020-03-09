@@ -8,6 +8,7 @@ using UnityEditor;
 
 public class POVGraph : MonoBehaviour
 {
+    public Dictionary<string, float> lookUpTable; 
 
     public Graph<Vector3, float> graph;
     public List<Edge<float, Vector3>> path; 

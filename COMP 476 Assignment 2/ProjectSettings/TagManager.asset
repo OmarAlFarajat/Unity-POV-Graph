@@ -6,6 +6,12 @@ TagManager:
   tags:
   - Wall
   - Floor
+  - A
+  - B
+  - C
+  - D
+  - E
+  - F
   layers:
   - Default
   - TransparentFX

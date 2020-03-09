@@ -5,10 +5,8 @@ using UnityEditor;
 
 using static POVGraph;
 
-//TODO:
 public class Pathfinder 
 {
-    //public enum Heuristic { Null, Euclidean, Cluster };
 
     Graph<Vector3, float> graph;
     public Heuristic heuristic; 
