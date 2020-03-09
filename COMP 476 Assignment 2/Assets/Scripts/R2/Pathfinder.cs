@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 using static POVGraph;
 
@@ -44,17 +45,26 @@ public class Pathfinder
         Open_List.Add(this.startNode);
     }
 
-    public void FindShortestPath()
+    public List<Edge<float, Vector3>> FindShortestPath()
     {
+        List<Edge<float, Vector3>> path = new List<Edge<float, Vector3>>(); 
+
         while (Open_List.Count != 0)
         {
-            // TODO: Verify that this is ascending
             Open_List.Sort((p1, p2) => p1.TotalCost.CompareTo(p2.TotalCost));
 
             Node<Vector3> m = Open_List[0];
 
             if (m == this.goalNode)
-                break;  // TODO: Define behaviour on break
+            {
+                while (m.predecessor != null)
+                {
+                    path.Add(new Edge<float, Vector3>() { EdgeColor = Color.green, From = m, To = m.predecessor });
+                    m = m.predecessor;
+                }
+
+                return path;   
+            }
 
             Open_List.Remove(m);
 
@@ -76,6 +86,7 @@ public class Pathfinder
                 {
                     Examined_List.Add(n);
                     Open_List.Add(n);
+                    n.predecessor = m;      // PARENT
                     n.CostTo = cost;
                     n.EstimatedCost = (this.goalNode.Position - n.Position).magnitude;
                     switch (heuristic)
@@ -90,6 +101,8 @@ public class Pathfinder
                 }
             }
         }
+        return null;    // SKETCH
+
     }
 
     List<Node<Vector3>> GetChildren(Node<Vector3> source)

@@ -10,6 +10,7 @@ public class POVGraph : MonoBehaviour
 {
 
     public Graph<Vector3, float> graph;
+    public List<Edge<float, Vector3>> path; 
     public Pathfinder pathfinder;
     public Vector3 startPosition;
     public Vector3 goalPosition;
@@ -51,6 +52,7 @@ public class POVGraph : MonoBehaviour
 
     void Start()
     {
+        path = new List<Edge<float, Vector3>>();
         initGraph();
         addNodesFromGeometry();
         castAddEdges();
@@ -140,9 +142,22 @@ public class POVGraph : MonoBehaviour
             {
                 if (n.Position != goalNode.Position && n.Position != startNode.Position)
                 {
-                    Gizmos.color = Color.green;
+                    Gizmos.color = Color.yellow;
                     Gizmos.DrawSphere(n.Position, NODE_SIZE);
                 }
+            }
+
+            foreach (var edge in path)
+            {
+                var thickness = 20f;
+
+                var p1 = edge.From.Position;
+                var p2 = edge.To.Position;
+                Handles.DrawBezier(p1, p2, p1, p2, Color.green, null, thickness);
+                Gizmos.color = Color.green;
+                Gizmos.DrawSphere(p1, NODE_SIZE);
+                Gizmos.DrawSphere(p2, NODE_SIZE);
+
             }
 
 
@@ -307,7 +322,7 @@ public class POVGraph : MonoBehaviour
                     {
                         pathfinder = new Pathfinder(startNode, goalNode, graph);
                         pathfinder.heuristic = HEURISTIC;
-                        pathfinder.FindShortestPath();
+                        path = pathfinder.FindShortestPath();
                     }
 
                     //Debug.Log("> ON INJECT...");
