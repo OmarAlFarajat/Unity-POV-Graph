@@ -7,7 +7,6 @@ using static POVGraph;
 
 public class Pathfinder 
 {
-
     Graph<Vector3, float> graph;
     public Heuristic heuristic; 
     public List<Node<Vector3>> Open_List;
@@ -28,7 +27,7 @@ public class Pathfinder
         this.goalNode = goalNode;
 
         this.startNode.CostTo = 0f;
-        this.startNode.EstimatedCost = (this.goalNode.Position - this.startNode.Position).magnitude;
+        this.startNode.EstimatedCost = (this.goalNode.Position - this.startNode.Position).sqrMagnitude;
 
         switch (heuristic)
         {
@@ -72,7 +71,7 @@ public class Pathfinder
             {
                 if (Closed_List.Contains(n))
                     continue;
-                float cost = m.CostTo + (m.Position-n.Position).magnitude;
+                float cost = m.CostTo + (m.Position-n.Position).sqrMagnitude;
 
                 if (Open_List.Contains(n) && cost < n.CostTo)
                     Open_List.Remove(n);
@@ -86,7 +85,7 @@ public class Pathfinder
                     Open_List.Add(n);
                     n.Predecessor = m;      // PARENT
                     n.CostTo = cost;
-                    n.EstimatedCost = (this.goalNode.Position - n.Position).magnitude;
+                    n.EstimatedCost = (this.goalNode.Position - n.Position).sqrMagnitude;
                     switch (heuristic)
                     {
                         case Heuristic.Null:

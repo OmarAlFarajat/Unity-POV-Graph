@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEditor;
+using System;
 
 [ExecuteInEditMode]
 
@@ -19,6 +20,7 @@ public class POVGraph : MonoBehaviour
     public Node<Vector3> goalNode;  
     private bool goalNodePlaced = false;
 
+    private List<GameObject> clusters;
     private GameObject[] walls;
     private GameObject player;
 
@@ -53,11 +55,12 @@ public class POVGraph : MonoBehaviour
 
     void Start()
     {
-        path = new List<Edge<float, Vector3>>();
         initGraph();
         addNodesFromGeometry();
+        setNodesMemberships();
         castAddEdges();
     }
+
     void Update()
     {
         // When Dynamic graph mode is enabled, the graph is re-initialized per frame. 
@@ -150,6 +153,26 @@ public class POVGraph : MonoBehaviour
     {
         graph = new Graph<Vector3, float>();
 
+        lookUpTable = new Dictionary<string, float>();
+
+        path = new List<Edge<float, Vector3>>();
+
+        if (clusters == null)
+        {
+            List<GameObject> A = GameObject.FindGameObjectsWithTag("A").ToList<GameObject>();
+            List<GameObject> B = GameObject.FindGameObjectsWithTag("B").ToList<GameObject>();
+            List<GameObject> C = GameObject.FindGameObjectsWithTag("C").ToList<GameObject>();
+            List<GameObject> D = GameObject.FindGameObjectsWithTag("D").ToList<GameObject>();
+            List<GameObject> E = GameObject.FindGameObjectsWithTag("E").ToList<GameObject>();
+            List<GameObject> F = GameObject.FindGameObjectsWithTag("F").ToList<GameObject>();
+
+            clusters = A.Union<GameObject>(B).ToList<GameObject>();
+            clusters = clusters.Union<GameObject>(C).ToList<GameObject>();
+            clusters = clusters.Union<GameObject>(D).ToList<GameObject>();
+            clusters = clusters.Union<GameObject>(E).ToList<GameObject>();
+            clusters = clusters.Union<GameObject>(F).ToList<GameObject>();
+        }
+
         if (walls == null)
             walls = GameObject.FindGameObjectsWithTag("Wall");
 
@@ -193,13 +216,13 @@ public class POVGraph : MonoBehaviour
                 if (!duplicateFound)
                 {
                     // Another foreach-loop with a bool flag to omit a bound offset vertex within a wall object's collider. 
-                    bool insideCollider = false;
+                    bool insideWall = false;
                     foreach(var wall_in in walls)
                         if (wall_in.GetComponent<Collider>().bounds.Contains(boundOffset))
-                            insideCollider = true;
+                            insideWall = true;
 
                     // The bound offset vertex is only added to the vertices container when no duplicate has been found and it is not within a collider. 
-                    if(!insideCollider)
+                    if(!insideWall)
                     vertices.Add(boundOffset);
                 }
                 
@@ -219,7 +242,9 @@ public class POVGraph : MonoBehaviour
         // Iterate through the vertices container and if the vertex is within the space of the map, add it as a node to the graph.
         foreach (var vertex in vertices)
             if (vertex.z < SQUARE_BOUNDS && vertex.z > -SQUARE_BOUNDS && vertex.x < SQUARE_BOUNDS && vertex.x > -SQUARE_BOUNDS)
+            {
                 graph.Nodes.Add(new Node<Vector3>() { Position = vertex, NodeColor = NODE_COLOR });
+            }
     }
 
     void addStartAndGoal()
@@ -232,7 +257,16 @@ public class POVGraph : MonoBehaviour
             startNode = graph.Nodes[graph.Nodes.Count - 1];
         }
     }
-
+    public void setNodesMemberships()
+    {
+        foreach (var n in graph.Nodes)
+            foreach (var c in clusters)
+                if (c.GetComponent<Collider>().bounds.Contains(n.Position))
+                {
+                    Debug.Log(c.name);
+                    n.Membership = c.name;
+                }
+    }
     void castAddEdges()
     {
         // Nested foreach-loops to take each node (nodeFrom) and raycast to all other nodes (nodeTo).
@@ -301,10 +335,6 @@ public class POVGraph : MonoBehaviour
                         pathfinder.heuristic = HEURISTIC;
                         path = pathfinder.FindShortestPath();
                     }
-
-                    //Debug.Log("> ON INJECT...");
-                    //Debug.Log(">> NUMBER OF NODES: " + graph.Nodes.Count());
-                    //Debug.Log(">> NUMBER OF EDGES: " + graph.Edges.Count());
                 }
             }
         }

@@ -23,6 +23,7 @@ public class Node<TNodeType>
         EstimatedCost = 0f;
         TotalCost = 0f;
         Predecessor = null;
+        Membership = "";
     }
     public Color NodeColor { get; set; }
     public TNodeType Position { get; set; }

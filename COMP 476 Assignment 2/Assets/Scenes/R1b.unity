@@ -1584,7 +1584,7 @@ GameObject:
   - component: {fileID: 495413180}
   - component: {fileID: 495413179}
   m_Layer: 2
-  m_Name: D3
+  m_Name: D
   m_TagString: D
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2997,7 +2997,6 @@ GameObject:
   - component: {fileID: 907117361}
   - component: {fileID: 907117360}
   - component: {fileID: 907117359}
-  - component: {fileID: 907117357}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -3005,18 +3004,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &907117357
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 907117356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e31af0e246191744bab4c232c529c59, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!136 &907117359
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3104,7 +3091,7 @@ GameObject:
   - component: {fileID: 934634067}
   - component: {fileID: 934634066}
   m_Layer: 2
-  m_Name: D1
+  m_Name: D
   m_TagString: D
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3647,7 +3634,7 @@ GameObject:
   - component: {fileID: 1034511179}
   - component: {fileID: 1034511178}
   m_Layer: 2
-  m_Name: B2
+  m_Name: B
   m_TagString: B
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3831,7 +3818,7 @@ GameObject:
   - component: {fileID: 1088123285}
   - component: {fileID: 1088123284}
   m_Layer: 2
-  m_Name: F2
+  m_Name: F
   m_TagString: F
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4598,7 +4585,7 @@ GameObject:
   - component: {fileID: 1201360886}
   - component: {fileID: 1201360885}
   m_Layer: 2
-  m_Name: F1
+  m_Name: F
   m_TagString: F
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6204,7 +6191,7 @@ GameObject:
   - component: {fileID: 1669461832}
   - component: {fileID: 1669461831}
   m_Layer: 2
-  m_Name: D2
+  m_Name: D
   m_TagString: D
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6974,7 +6961,7 @@ GameObject:
   - component: {fileID: 1858961758}
   - component: {fileID: 1858961757}
   m_Layer: 2
-  m_Name: B3
+  m_Name: B
   m_TagString: B
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7619,7 +7606,7 @@ GameObject:
   - component: {fileID: 2064364694}
   - component: {fileID: 2064364693}
   m_Layer: 2
-  m_Name: B1
+  m_Name: B
   m_TagString: B
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
