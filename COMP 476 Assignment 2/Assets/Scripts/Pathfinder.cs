@@ -55,10 +55,10 @@ public class Pathfinder
 
             if (m == this.goalNode)
             {
-                while (m.predecessor != null)
+                while (m.Predecessor != null)
                 {
-                    path.Add(new Edge<float, Vector3>() { EdgeColor = Color.green, From = m, To = m.predecessor });
-                    m = m.predecessor;
+                    path.Add(new Edge<float, Vector3>() { EdgeColor = Color.green, From = m, To = m.Predecessor });
+                    m = m.Predecessor;
                 }
 
                 return path;   
@@ -84,7 +84,7 @@ public class Pathfinder
                 {
                     Examined_List.Add(n);
                     Open_List.Add(n);
-                    n.predecessor = m;      // PARENT
+                    n.Predecessor = m;      // PARENT
                     n.CostTo = cost;
                     n.EstimatedCost = (this.goalNode.Position - n.Position).magnitude;
                     switch (heuristic)

@@ -6218,8 +6218,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1669461829}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -4.24, y: 0.45, z: -0.7}
-  m_LocalScale: {x: 2.5, y: 1, z: 1.4}
+  m_LocalPosition: {x: -4.24, y: 0.45, z: -0.11}
+  m_LocalScale: {x: 1, y: 1, z: 1.4}
   m_Children: []
   m_Father: {fileID: 1389999058}
   m_RootOrder: 6
@@ -7822,12 +7822,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
   goalPosition: {x: 0, y: 0, z: 0}
-  HEURISTIC: 0
-  GRAPH_MODE: 1
+  HEURISTIC: 1
+  GRAPH_MODE: 0
   NODE_COLOR: {r: 1, g: 0, b: 0, a: 1}
   SHOW_WEIGHTS: 0
   NODE_SIZE: 0.25
-  GRAPH_RESOLUTION: 1.85
+  GRAPH_RESOLUTION: 2.13
   VERTICAL_OFFSET: 0.001
 --- !u!4 &2107719030
 Transform:

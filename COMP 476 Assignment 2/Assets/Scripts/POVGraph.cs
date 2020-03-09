@@ -48,7 +48,7 @@ public class POVGraph : MonoBehaviour
     public float GRAPH_RESOLUTION = 1.4f;
 
     [Tooltip("Adjusts the vertical height of the graph relative to the floor.")]
-    [Range(0.001f, 0.5f)]
+    [Range(0.001f, 1.0f)]
     public float VERTICAL_OFFSET = 0.001f;
 
     void Start()
@@ -57,10 +57,6 @@ public class POVGraph : MonoBehaviour
         initGraph();
         addNodesFromGeometry();
         castAddEdges();
-
-        //Debug.Log("> ON START...");
-        //Debug.Log(">> NUMBER OF NODES: " + graph.Nodes.Count());
-        //Debug.Log(">> NUMBER OF EDGES: " + graph.Edges.Count());
     }
     void Update()
     {
@@ -69,15 +65,7 @@ public class POVGraph : MonoBehaviour
         {
             initGraph();
             addNodesFromGeometry();
-
-            if (goalNodePlaced)
-            {
-                graph.Nodes.Add(new Node<Vector3>() { Position = goalPosition, NodeColor = Color.green });
-                goalNode = graph.Nodes[graph.Nodes.Count - 1];
-                graph.Nodes.Add(new Node<Vector3>() { Position = startPosition, NodeColor = Color.yellow });
-                startNode = graph.Nodes[graph.Nodes.Count - 1];
-            }
-
+            addStartAndGoal();
             castAddEdges();
         }
 
@@ -110,6 +98,7 @@ public class POVGraph : MonoBehaviour
             Gizmos.color = node.NodeColor;
             if (goalNodePlaced && node.Position == goalNode.Position || goalNodePlaced && node.Position == startNode.Position)
             {
+                node.Position = new Vector3(node.Position.x, VERTICAL_OFFSET, node.Position.z);
                 Gizmos.DrawSphere(node.Position, NODE_SIZE * 1.5f);
                 Gizmos.color = Color.cyan; ;
                 Gizmos.DrawSphere(node.Position, NODE_SIZE * 0.75f);
@@ -117,7 +106,6 @@ public class POVGraph : MonoBehaviour
             }
             else
                 Gizmos.DrawSphere(node.Position, NODE_SIZE);
-
         }
         
         // Color examined nodes in magenta
@@ -128,21 +116,17 @@ public class POVGraph : MonoBehaviour
                 if (n.Position != goalNode.Position && n.Position != startNode.Position)
                 //if (n != goalNode && n != startNode)
                 {
+                    n.Position = new Vector3(n.Position.x, VERTICAL_OFFSET, n.Position.z);
                     Gizmos.color = Color.magenta;
                     Gizmos.DrawSphere(n.Position, NODE_SIZE);
                 }
             }
 
-            //Gizmos.color = Color.green;
-            //int index = pathfinder.Closed_List.Count - 1; 
-            //Gizmos.DrawSphere(pathfinder.Closed_List[index].Position, NODE_SIZE * 2f);
-
-
-
             foreach (var n in pathfinder.Closed_List)
             {
                 if (n.Position != goalNode.Position && n.Position != startNode.Position)
                 {
+                    n.Position = new Vector3(n.Position.x, VERTICAL_OFFSET, n.Position.z);
                     Gizmos.color = Color.yellow;
                     Gizmos.DrawSphere(n.Position, NODE_SIZE);
                 }
@@ -152,33 +136,14 @@ public class POVGraph : MonoBehaviour
             {
                 var thickness = 20f;
 
-                var p1 = edge.From.Position;
-                var p2 = edge.To.Position;
+                var p1 = new Vector3(edge.From.Position.x, VERTICAL_OFFSET, edge.From.Position.z);
+                var p2 = new Vector3(edge.To.Position.x, VERTICAL_OFFSET, edge.To.Position.z);
                 Handles.DrawBezier(p1, p2, p1, p2, Color.green, null, thickness);
                 Gizmos.color = Color.green;
                 Gizmos.DrawSphere(p1, NODE_SIZE);
                 Gizmos.DrawSphere(p2, NODE_SIZE);
-
             }
-
-
         }
-
-        //// Leave this here as a reference to R2/R3. Will be used to "highlight" shortest and explored paths in A* search.  
-        //var thickness = 10;
-
-        //Vector3 verticalOffset = new Vector3(0f, 0f, 0f);
-        //var p1 = graph.Edges[20].From.Position + verticalOffset;
-        //var p2 = graph.Edges[20].To.Position + verticalOffset;
-        //Handles.DrawBezier(p1, p2, p1, p2, Color.green, null, thickness);
-
-        //p1 = graph.Edges[30].From.Position + verticalOffset;
-        //p2 = graph.Edges[30].To.Position + verticalOffset;
-        //Handles.DrawBezier(p1, p2, p1, p2, Color.yellow, null, thickness);
-
-        //p1 = graph.Edges[40].From.Position + verticalOffset;
-        //p2 = graph.Edges[40].To.Position + verticalOffset;
-        //Handles.DrawBezier(p1, p2, p1, p2, Color.magenta, null, thickness);
     }
 
     void initGraph()
@@ -255,6 +220,17 @@ public class POVGraph : MonoBehaviour
         foreach (var vertex in vertices)
             if (vertex.z < SQUARE_BOUNDS && vertex.z > -SQUARE_BOUNDS && vertex.x < SQUARE_BOUNDS && vertex.x > -SQUARE_BOUNDS)
                 graph.Nodes.Add(new Node<Vector3>() { Position = vertex, NodeColor = NODE_COLOR });
+    }
+
+    void addStartAndGoal()
+    {
+        if (goalNodePlaced)
+        {
+            graph.Nodes.Add(new Node<Vector3>() { Position = goalPosition, NodeColor = Color.green });
+            goalNode = graph.Nodes[graph.Nodes.Count - 1];
+            graph.Nodes.Add(new Node<Vector3>() { Position = startPosition, NodeColor = Color.yellow });
+            startNode = graph.Nodes[graph.Nodes.Count - 1];
+        }
     }
 
     void castAddEdges()

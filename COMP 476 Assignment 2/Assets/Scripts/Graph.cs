@@ -22,12 +22,12 @@ public class Node<TNodeType>
         CostTo = 0f;
         EstimatedCost = 0f;
         TotalCost = 0f;
-        predecessor = null;
+        Predecessor = null;
     }
     public Color NodeColor { get; set; }
     public TNodeType Position { get; set; }
-    public Node<Vector3> predecessor { get; set; }
-
+    public Node<Vector3> Predecessor { get; set; }
+    public string Membership { get; set; }
 
     // g()
     public float CostTo { get; set; }
